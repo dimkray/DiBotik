@@ -1,0 +1,6 @@
+
+*.pyc
+*.chat
+*.html
+log.txt
+log_error.txt
