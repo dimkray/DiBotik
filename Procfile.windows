@@ -1,1 +1,1 @@
-worker: python DiBotik.py
+worker: python Bot.py
