@@ -1,2 +1,2 @@
-# DiBotik
-DiBotik
+# DiBot
+Проект бота Ди
