@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ПреПроцессор - стартовый обработчик пользовательских запросов
 import Fixer
-from Services.Yandex import Yandex
+from Services.Yandex import Ya
 from Services.Analyzer import TextFinder
 from Services.StrMorph import String, Word
 
@@ -12,21 +12,37 @@ def MultiProcessor(text):
     # происк мультизапроса и выполнение запроса (анализ)
     mMulti = String.GetStrings(text)
     mDel = []; i = 0
-    for item in mMulti: # поиск пустых запросов
-        if item.strip() == '': mDel.append(i)
+    for item in mMulti:  # поиск пустых запросов
+        if item.strip() == '':
+            mDel.append(i)
         i += 1
-    for iDel in mDel: # удаление пустых запросов
-        del(mMulti[idel])
+    for iDel in mDel:  # удаление пустых запросов
+        del(mMulti[iDel])
     return mMulti
+
 
 # препроцессорный обработчик пользовательских запросов
 def ReadMessage(text):
     Fixer.log('PreProcessor.ReadMessage', text)
+    # Фиксация слов
+    fix = ''
+    text = Fixer.strSpec(text)
+    if '"' in text:
+        fix_start = text.find('"')
+        fix_end = text.find('"', fix_start+1)
+        if fix_end > 0:
+            no_fix = text[:fix_start] + '["]' + text[fix_end+1:]
+        else:
+            no_fix = text[:fix_start] + '["]'
+        fix = text[fix_start+1:fix_end]
+        text = no_fix
     # Запуск сервиса Яндекс.Спеллер для исправления пользовательских опечаток
-    text = Yandex.Speller(text)
+    text = Ya.Speller(text)
     Fixer.log('Яндекс.Спеллер: ' + text)
     stext = text.upper()
-    stext = stext.replace('Ё','Е')
+    stext = stext.replace('Ё', 'Е')
+    # Возвращаем зафиксированные слова
+    stext = stext.replace('["]', fix)
     # Поиск совпадений по первому слову
     Fixer.log('PreProcessor.Word1')
     for word in Fixer.Word1:
@@ -45,9 +61,10 @@ def ReadMessage(text):
                 Fixer.log('PreProcessor.KeyWord', 'Найдено совпадение по ключевому слову [' + word + ']:' + text)
                 break
     # Анализ сообщения
-    Fixer.log('PreProcessor.Analyzer')
-    texttype, count = TextFinder.AnalyzeType(text)
-    if texttype == 50 and count > 1: text = '#translate: русский: ' + text
-    if texttype == 40 and count > 1: text = '#calculator: ' + text
+    if ': ' not in text:
+        Fixer.log('PreProcessor.Analyzer')
+        texttype, count = TextFinder.AnalyzeType(text)
+        if texttype == 50 and count > 3: text = '#translate: русский: ' + text
+        if texttype == 40 and count > 1: text = '#calculator: ' + text
     if text[0] == '#': Fixer.bAI = False # отключаем искуственный интеллект
     return text

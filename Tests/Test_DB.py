@@ -1,7 +1,7 @@
 import Fixer
 from DB.SQLite import SQL
 from DB.SQLite import Finder
-from Services.Yandex import Yandex
+from Services.Yandex import Ya
 from Profiler import Profiler
 
 stest = input('Введите запрос на поиск: ')

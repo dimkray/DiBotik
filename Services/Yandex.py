@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import requests
 import json
+# import logging
 import config
 import Fixer
 from Services.Geo import Geo
 from DB.SQLite import SQL
+from Profiler import decorator
 
 tformat = '%Y-%m-%d %H:%M:%S'
 path = 'rasp-yandex.json'
@@ -13,27 +15,35 @@ dir_lang = []
 for item in Fixer.yaDirLang:
     dir_lang.append(item[0]+'-'+item[1])
 
-tr_type = [['САМОЛ','plane', 3],['ПОЕЗД','train', 1],['ЭЛЕКТР','suburban', 1],
-           ['АВТОБУС','bus', 2],['ВОДН','water', 4],['ВЕРТОЛ','helicopter', 3]]
-trd = {'All':'любой транспорт', 'plane':'самолёт', 'train':'поезд', 'suburban':'электричка',
-       'bus':'автобус', 'water':'водный транспорт', 'helicopter':'вертолёт'}
+tr_type = [['САМОЛ', 'plane', 3], ['ПОЕЗД', 'train', 1], ['ЭЛЕКТР', 'suburban', 1],
+           ['АВТОБУС', 'bus', 2], ['ВОДН', 'water', 4], ['ВЕРТОЛ', 'helicopter', 3]]
+trd = {'All': 'любой транспорт', 'plane': 'самолёт', 'train': 'поезд', 'suburban': 'электричка',
+       'bus': 'автобус', 'water': 'водный транспорт', 'helicopter': 'вертолёт'}
 mounth = ['ЯНВАРЯ', 'ФЕВРАЛЯ', 'МАРТА', 'АПРЕЛЯ', 'МАЯ', 'ИЮНЯ', 'ИЮЛЯ',
           'АВГУСТА', 'СЕНТЯБРЯ', 'ОКТЯБРЯ', 'НОЯБРЯ', 'ДЕКАБРЯ']
 trSt = {'': 0, 'unknown': 0, 'train_station': 1, 'platform': 1, 'station': 1,
-        'bus_station': 2, 'bus_stop': 2, 'airport':3, 'whafr': 4, 'river_port': 4, 'port': 4}
+        'bus_station': 2, 'bus_stop': 2, 'airport': 3, 'whafr': 4, 'river_port': 4, 'port': 4}
+
 
 # Поиск идентификатора языка
+
 def FindLang(slang):
+    slang = slang.strip()
     if slang.upper() in Fixer.yaLangs:
         return Fixer.yaLangs[slang.upper()]
-    else: return ''
+    else:
+        return ''
+
 
 # Функция - есть ли станция/город в базе
 def isStation(station):
-    if len(SQL.ReadRowLike('stations', 'nameU', station.upper())) > 0: return True		
-    else: return False
+    if len(SQL.ReadRowLike('stations', 'nameU', station.upper())) > 0:
+        return True
+    else:
+        return False
 
-# Функция - есть ли станция/город в базе
+
+# Функция - есть ли станция/город в базе (с фиксацией региона)
 def isStational(station):
     iSt = 0
     row = SQL.ReadRowLike('stations', 'nameU', station.upper())
@@ -46,8 +56,8 @@ def isStational(station):
                 Fixer.region = row[3]
             elif row[4] != '':
                 Fixer.region = row[4]
-
     return True if iSt > 0 else False
+
 
 # Функция вариантов станции/города в базе
 def eStation(stat):
@@ -60,6 +70,7 @@ def eStation(stat):
     if isStation(stat):
         return stat
     return ''
+
 
 # Функция поиска станции/города в базе
 def FindStation(station):
@@ -100,7 +111,7 @@ def FindStation(station):
             print('Фильтрация...')
             x = 0
             for ist in db2:
-                print(str(x) +' - '+ ist[1] + ' ' + ist[2] + ' ' + ist[3] + ' ' + ist[4] + ' ' + ist[5])
+                print(str(x) + ' - ' + ist[1] + ' ' + ist[2] + ' ' + ist[3] + ' ' + ist[4] + ' ' + ist[5])
                 x += 1
             st = db2[1]
         else:
@@ -116,7 +127,7 @@ def FindStation(station):
             Fixer.region = st[3]
         if Fixer.region == '':
             Fixer.region = st[4]
-        print('Назначена станция: ' + st[1] + '\n' )
+        print('Назначена станция: ' + st[1] + '\n')
         istation = st[8]
         Fixer.nameSt = st[1]
         Fixer.LastCoords.append(Fixer.Coords)		
@@ -125,7 +136,7 @@ def FindStation(station):
         Fixer.Coords.append(st[6])
     return istation
 
-class Yandex:
+class Ya:
     
     # Сервис Яндекс.Расписание
     # Сервис с актуальными расписаниями самолётов, поездов, электричек, автобусов, теплоходов и паромов
@@ -133,9 +144,10 @@ class Yandex:
 
     ##### ОСНОВНОЙ КОД #####
 
+    @decorator.benchmark
     def FindRasp(s):
         try:
-            rez = '#bug: Yandex.Rasp'
+            rez = '#bug: Ya.Rasp'
             Fixer.iTr = 0
             Fixer.region = ''; Fixer.nameSt = ''
             stime = ''; bnow = True
@@ -296,7 +308,7 @@ class Yandex:
                 rez += '#https://rasp.yandex.ru/search/?fromId='+st1+'&toId='+st2+'&when='+sdate
             return rez
         except Exception as e:
-            Fixer.errlog('Yandex.FindRasp', str(e))
+            Fixer.errlog('Ya.FindRasp', str(e))
             return '#bug: ' + str(e)
     
     # Сервис Яндекс.Спеллер
@@ -304,9 +316,10 @@ class Yandex:
     # в русском, украинском или английском тексте. Языковые модели Спеллера
     # включают сотни миллионов слов и словосочетаний.
     # https://tech.yandex.ru/speller/doc/dg/reference/checkText-docpage/
+    @decorator.benchmark
     def Speller(s):
         try:
-            rez = '#bug: Yandex.Speller'
+            rez = '#bug: Ya.Speller'
             http = 'https://speller.yandex.net/services/spellservice.json/checkText'
             payload = {'text': s, 'options': 4} 
             r = requests.get(http, params=payload)
@@ -327,10 +340,11 @@ class Yandex:
                 rez = '#problem: '+ str(r.status_code)
             return rez
         except Exception as e:
-            Fixer.errlog('Yandex.Speller', str(e))
+            Fixer.errlog('Ya.Speller', str(e))
             return '#bug: ' + str(e)
 
     # Сервис Яндекс.Переводчик
+    @decorator.benchmark
     def Translate(s, lang1, lang2):
         try:
             rez = ''
@@ -362,10 +376,11 @@ class Yandex:
                 rez = '#problem: '+ str(r.status_code)
             return rez
         except Exception as e:
-            Fixer.errlog('Yandex.Translate', str(e))
+            Fixer.errlog('Ya.Translate', str(e))
             return '#bug: ' + str(e)
 
     # Сервис Яндекс поиск объектов/организаций
+    @decorator.benchmark
     def Objects(text, Xloc=Fixer.X, Yloc=Fixer.Y, dr=10, fix=1):
         try:
             rez = ''
@@ -463,11 +478,12 @@ class Yandex:
                 x += 1
             return rez
         except Exception as e:
-            Fixer.errlog('Yandex.Objects', str(e))
+            Fixer.errlog('Ya.Objects', str(e))
             return '#bug: ' + str(e)
 
     # Сервис Яндекс.Координаты
     # Яндекс.Координаты возвращает географические координаты города/станции
+    @decorator.benchmark
     def Coordinates(station):
         try:
             s = eStation(station.upper())
@@ -478,11 +494,12 @@ class Yandex:
             if Fixer.Coords[0] == Fixer.Coords[1] == 0: return '#poblem: не заданы координаты'
             return str(Fixer.Coords[1]) + ', ' + str(Fixer.Coords[0])
         except Exception as e:
-            Fixer.errlog('Yandex.Coordinates', str(e))
+            Fixer.errlog('Ya.Coordinates', str(e))
             return '#bug: ' + str(e)
 
     # Сервис Яндекс.Каталог
     # Яндекс.Каталог возвращает информацию о сайте (тиц, раздел, регион)
+    @decorator.benchmark
     def Catalog(url):
         try:
             url = url.strip()
@@ -493,7 +510,6 @@ class Yandex:
                 if icount == 0: return 'Сайт или часть сайта "%s" не найдена :(\nСледует уточнить строку поиска или убедиться, что сайт существует.' % url
                 if icount > 5: s += '. Но будут показаны первые 5:'; icount = 5
                 else: s += ':'
-                print(icount)
                 try:
                     mfind = sorted(mfind, key=lambda st: st[3], reverse=True)
                 except: pass
@@ -510,11 +526,12 @@ class Yandex:
                 return s
             else: return 'Строка "%s" для поиска информации по сайту слишком мала!' % url
         except Exception as e:
-            Fixer.errlog('Yandex.Catalog', str(e))
+            Fixer.errlog('Ya.Catalog', str(e))
             return '#bug: ' + str(e)
         
     # Сервис Яндекс.Каталог
     # Яндекс.Каталог ищет сайт по запросу
+    @decorator.benchmark
     def FindCatalog(text):
         try:
             text = text.upper().strip()
@@ -546,6 +563,6 @@ class Yandex:
                 return s
             else: return 'Строка "%s" для поиска сайта слишком мала!' % text
         except Exception as e:
-            Fixer.errlog('Yandex.FindCatalog', str(e))
+            Fixer.errlog('Ya.FindCatalog', str(e))
             return '#bug: ' + str(e)
 

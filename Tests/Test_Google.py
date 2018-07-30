@@ -1,4 +1,4 @@
-from Services.Yandex import Yandex
+from Services.Yandex import Ya
 from Services.URLParser import URL, Parser
 import certifi
 import urllib3

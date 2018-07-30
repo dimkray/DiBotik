@@ -1,11 +1,11 @@
-from Services.Yandex import Yandex
+from Services.Yandex import Ya
 
 bwork = True
 while bwork:
     stest = input('Введите тестовую фразу: ')
 
     # здесь тестовая обработка #
-    stest = Yandex.Speller(stest)
+    stest = Ya.Speller(stest)
 
     print('Результат тестирования: ' + stest)
 

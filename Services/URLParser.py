@@ -22,9 +22,9 @@ def cln(text):
 
 class URL:
     # Возвращает URL
-    def GetURL(shttp, stext = '', textparam = '', params = {}):
+    def GetURL(shttp, stext='', textparam='', params={}):
         try:
-            stext = stext.replace(' ','+')
+            stext = stext.replace(' ', '+')
             stext = format(quote(stext))
             if len(params) > 0 or len(textparam) > 0:
                 if len(textparam) > 0: params[textparam] = stext
@@ -58,13 +58,15 @@ class URL:
     # Получение html/основного текста по запросу
     def GetData(shttp, stext = '', textparam = '', params = {}, headers = {},
                 brequest = True, bsave = False, bjson = False, google = True):
-        #try:
+        try:
             if google == True: stext = stext.replace(' ','+')
             stext = format(quote(stext))
-            if len(textparam) > 0: params[textparam] = stext
+            if len(textparam) > 0:
+                params[textparam] = stext
             else:
-                if len(stext) > 0: shttp += format(quote(stext))
-            status = 0; d = '' # Данные для ответа
+                if len(stext) > 0:
+                    shttp += format(quote(stext))
+            status = 0; d = ''  # Данные для ответа
             if brequest: # Если через request
                 r = requests.get(shttp, params=params, headers=headers, verify=False)
                 print(shttp)
@@ -98,9 +100,29 @@ class URL:
                         f.write(d)
                     f.close()
                 return d
-##        except Exception as e:
-##            Fixer.errlog('URL.GetData', str(e))
-##            print('#bug: ' + str(e))               
+        except Exception as e:
+            Fixer.errlog('URL.GetData', str(e))
+            print('#bug: ' + str(e))
+
+
+    # Использование метода POST
+    def PostData(shttp, dheaders={}, djson={}):
+        try:
+            if len(djson) > 0 and len(dheaders) > 0:
+                r = requests.post(shttp, headers=dheaders, json=djson)
+            elif len(djson) > 0:
+                r = requests.post(shttp, json=djson)
+            elif len(dheaders) > 0:
+                r = requests.post(shttp, headers=dheaders)
+            else:
+                r = requests.post(shttp)
+            status = r.status_code
+            d = ''
+            if status == requests.codes.ok: d = r.text
+            return json.loads(d)
+        except Exception as e:
+            print('#bug: ' + str(e))
+
 
 class Parser: # Класс парсинга
     # Поиск значений в html (если ball то выводится список значений)

@@ -18,13 +18,19 @@ class TextFinder:
     # Определение типов
     def AnalyzeType(text):
         words = String.GetWords(text)
+        if len(words) == 0:
+            return 1, 0
         sumType = 0
         for word in words:
             sumType += Word.Type(word)
-        if sumType/len(words) > 40: return 50, len(words)  # латиница
-        if sumType/len(words) > 30: return 40, len(words)  # цифры
-        if sumType/len(words) > 0: return 1, len(words)  # предложение
-        else: return 1, len(words)  # неизвестные слова
+        if sumType/len(words) > 40:
+            return 50, len(words)  # латиница
+        if sumType/len(words) > 30:
+            return 40, len(words)  # цифры
+        if sumType/len(words) > 0:
+            return 1, len(words)  # предложение
+        else:
+            return 1, len(words)  # неизвестные слова
     
     #def FindCity(text):
 

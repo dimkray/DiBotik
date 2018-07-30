@@ -39,12 +39,17 @@ def GetClass(name):
     return cl
 
 # Полчение списка всех функций указанного класса
-def GetMembers(iclass):
+def GetMemberList(iclass):
     mlist = []
     for i in GetAllMembers(iclass):
         if not i.startswith("__"):
             mlist.append(i)
     return mlist
+
+# Полчение списка всех функций указанного класса (с функциями)
+def GetMembers(iclass):
+    return inspect.getmembers(iclass, predicate=inspect.isfunction)
+    
 
 # Получение всех атрибутов указанного класса
 def GetAttrs(obj):

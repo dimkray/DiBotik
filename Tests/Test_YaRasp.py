@@ -1,4 +1,4 @@
-from Services.Yandex import Yandex
+from Services.Yandex import Ya
 
 # Обработка результатов сервиса Яндекс.Расписание
 def FormRasp(s):
@@ -40,7 +40,7 @@ while bwork:
     
     # здесь тестовая обработка #
     tstr = ''; gstr = ''
-    tsend = Yandex.FindRasp(stest)
+    tsend = Ya.FindRasp(stest)
     tsend = FormRasp(tsend)
     print(tsend)
 

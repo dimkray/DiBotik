@@ -1,10 +1,10 @@
 import Fixer
-from Services.Yandex import Yandex
+from Services.Yandex import Ya
 
 stest = input('Введите тестовую фразу: ')
 
 # здесь тестовая обработка #
-stest = Yandex.Catalog(stest)
+stest = Ya.Catalog(stest)
 
 print('Результат тестирования: ' + stest)
 

@@ -513,7 +513,7 @@ class Finder:
     def strFind(table, mcols, svalue, returnCol = [], items = 5, sFormat = ''):
         Fixer.log('SQLite.strFind')
         m = Finder.FindAll(table, mcols, svalue, returnCol=returnCol)
-        return Fixer.strformat(m, items=items, sformat=sFormat, nameCol=returnCol)
+        return Fixer.strFormat(m, items=items, sformat=sFormat, nameCol=returnCol)
 
 # класс работы с SVN-файлами
 class CSV:

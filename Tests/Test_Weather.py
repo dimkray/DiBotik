@@ -1,5 +1,5 @@
 import requests
-#import Services.Yandex
+#import Services.Ya
 apikey = 'MsEJc54YAFZeJOumeXpehdfguhJMLK1R'
 
 stest = input('Введите тестовые координаты: ')

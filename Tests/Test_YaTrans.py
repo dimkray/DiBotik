@@ -1,11 +1,11 @@
-from Services.Yandex import Yandex
+from Services.Yandex import Ya
 
 bwork = True
 while bwork:
     stest = input('Введите тестовую фразу: ')
 
     # здесь тестовая обработка #
-    stest = Yandex.Translate(stest,'авто','английский')
+    stest = Ya.Translate(stest, 'авто', 'английский')
 
     print('Результат тестирования: ' + stest)
 

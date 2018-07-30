@@ -5,7 +5,8 @@ import Fixer
 # Измерение расстояние от одной точки до другой
 def Alltests():
     try:
-        # доработать...
+        import Tests.Test_Yandex
+
     except Exception as e:
         Fixer.errlog('SMath.Distance', str(e))
         return '#bug: ' + str(e) 

@@ -10,21 +10,25 @@ from urllib.parse import urlencode
 from urllib.parse import quote
 from Services.URLParser import URL, Parser
 
+
 # Чтение/парсинг сайта - получение основной информации
 def ReadSite(url):
     print('Чтение: '+url)
     s = ''
     data = URL.GetData(url, brequest=False)
     if data[0] != '#':
-        text = Parser.Find(data,'<p>', sstart='>', send='</p>', ball=True)
+        text = Parser.Find(data, '<p>', sstart='>', send='</p>', ball=True)
         if text[0] != '#':
             for ss in text:
                 s += '\n' + ss
-                if len(s) > 500: s += '...';break
+                if len(s) > 500:
+                    s += '...'
+                    break
             s += '\n' + url
-    s += s.replace('&nbsp;','')
+    s = Fixer.strSpec(s)
     print('Результат: ' + s)
     return s      
+
 
 class Google:
     # Сервис получения коротких гиперссылок
@@ -93,12 +97,11 @@ class Google:
     # Сервис калькулятора
     def Calc(text):
         try:
-            text = text.replace(' ','')
+            text = text.replace(' ', '')
             #text = text.replace('+','%2B')
             url = URL.GetURL('https://www.google.ru/search', stext=text, textparam='q')
             Fixer.htext = ''
-            data = URL.OpenURL(url, bsave = True)
-            tsend = '#err: none calc'
+            data = URL.OpenURL(url, bsave=True)
             if data[0] != '#':
                 mItems = Parser.Parse(data, sdiv='span', sclass='cwcot', stype='text')
             if mItems[0][0] == '#': return 'Не удалось вычислить: ' + text
@@ -114,18 +117,19 @@ class Google:
         if len(m) > 0:
             print(m[0])
             return m[0]
-        else: return ''
+        else:
+            return ''
 
     # Сервис поиска универсальной карты (с маршрутами или обозначениями)
     def Search(text, bmap=False):
         try:
-            data = URL.GetData('https://www.google.ru/search',stext=text,textparam='q',brequest=False, bsave=True)
+            data = URL.GetData('https://www.google.ru/search', stext=text, textparam='q', brequest=False, bsave=True)
             if data[0] != '#':
                 # поиск карты
                 if bmap:
-                    ftext = Parser.Find(data,'https://maps.google.ru/maps?q=', send='"', ball=False)
+                    ftext = Parser.Find(data, 'https://maps.google.ru/maps?q=', send='"', ball=False)
                     if ftext[0] != '#':
-                        ftext = ftext.replace('%2B','%20')
+                        ftext = ftext.replace('%2B', '%20')
                         Fixer.htext = ftext #назначаем гиперссылку
                         #Fixer.htext = Google.Short(Fixer.htext) # делаем её короткой
                         # Поиск картинки
@@ -140,8 +144,8 @@ class Google:
                     else:
                         print('#bug: none map')
                 # поиск текста
-                ftext = Parser.Find(data,'href="/search?newwindow', sstart=':', send='+', ball=True)
-                atext = Parser.Find(data,'<a href="/url?q=', sstart='q=', send='&', ball=True)
+                ftext = Parser.Find(data, 'href="/search?newwindow', sstart=':', send='+', ball=True)
+                atext = Parser.Find(data, '<a href="/url?q=', sstart='q=', send='&', ball=True)
                 s = ''
                 if atext[0] != '#': s = ReadSite(atext[0])
                 if s == '' and ftext[0] != '#':
