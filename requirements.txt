@@ -14,7 +14,7 @@ public==0.0.65
 query-string==0.0.28
 request==0.0.26
 requests==2.18.4
-urllib3==1.22
+urllib3==1.26.5
 vk-api==10.1
 wikipedia==1.4.0
 feedparser==5.2.1
