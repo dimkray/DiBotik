@@ -7,7 +7,7 @@ geolocation-python==0.2.2
 geopy==1.12.0
 get==0.0.39
 idna==2.6
-lxml==4.2.1
+lxml==4.9.1
 numpy==1.14.2
 post==0.0.26
 public==0.0.65
